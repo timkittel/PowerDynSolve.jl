@@ -37,6 +37,15 @@ function operationpoint(start::AbstractState{G, V, T}) where {G, V, T}
     State(grid, res.zero)
 end
 
+function operationpoint(start::AbstractState{G, V, T}, t, perturbation) where {G, V, T}
+    @warn "operationpoint with stability check is still an experimental feature"
+    pre_fp = operationpoint(start)
+    # add a perturbation
+    pre_fp += State(GridDynamics(start), rand(SystemSize(start)).*perturbation)
+    traj = solve(GridDynamics(start), start, (0, t))
+    operationpoint(traj(t_end(traj)))
+end
+
 function operationpoint(grid::GridDynamics, start::AbstractState)
     @assert grid === GridDynamics(start)
     operationpoint(start)

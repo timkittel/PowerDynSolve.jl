@@ -43,6 +43,16 @@ fp = operationpoint(start)
 end
 
 let
+parnodes = [SwingEq(H=2, P =2, D=1, Ω=50), PQAlgebraic(S=-2)]
+LY = [im -im; -im im]
+g = GridDynamics(parnodes, LY)
+start = State(g, rand(SystemSize(g)))
+fp = operationpoint(start)
+fp2 = operationpoint(start, 100, 0.1)
+@test fp ≈ fp2
+end
+
+let
 U1 = 1+5im
 P2 = -1
 V2 = 2

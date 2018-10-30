@@ -21,8 +21,10 @@ struct GridSolution <: AbstractGridSolution
 end
 GridDynamics(sol::GridSolution) = sol.griddynamics
 TimeSeries(sol::GridSolution) = sol.dqsol
-tspan(sol::GridSolution) = (TimeSeries(sol).t[1], TimeSeries(sol).t[end])
-tspan(sol::GridSolution, tres) = range(TimeSeries(sol).t[1], stop=TimeSeries(sol).t[end], length=tres)
+t_begin(sol::GridSolution) = TimeSeries(sol).t[1]
+t_end(sol::GridSolution) = TimeSeries(sol).t[end]
+tspan(sol::GridSolution) = (t_begin(sol), t_end(sol))
+tspan(sol::GridSolution, tres) = range(t_begin(sol), stop=t_end(sol), length=tres)
 
 (sol::GridSolution)(t, ::Colon, sym::Symbol, args...) = sol(t, eachindex(Nodes(sol)), sym, args...)
 (sol::GridSolution)(t, n, sym::Symbol, args...) = begin
@@ -47,6 +49,8 @@ end
 (sol::GridSolution)(t, n, ::Type{Val{:int}}, i) = @>> TimeSeries(sol)(t, idxs=internalindex(sol, n, i)) convert(Array)
 (sol::GridSolution)(t, n, ::Type{Val{sym}}) where sym = sol(t, n, Val{:int}, sym)
 
+# if only a time is given, return a State instance
+(sol::GridSolution)(t::Number) = @>> TimeSeries(sol)(t) convert(Array) State(GridDynamics(sol))
 
 # define the plotting recipes
 using RecipesBase
